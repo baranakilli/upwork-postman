@@ -20,6 +20,8 @@ app.get('/health', (req, res) => {
 const checkNewJobs = async () => {
     try {
         console.log('İş ilanları kontrol ediliyor...');
+        // Random delay ekle (2-5 saniye)
+        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
         const jobs = await getJobs();
         
         if (jobs.length > 0) {
