@@ -7,23 +7,45 @@ const getJobs = async () => {
     console.log("Browser başlatılıyor...");
     browser = await chromium.launch({
       headless: true,
+      args: [
+        '--disable-dev-shm-usage',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process'
+      ]
     });
 
     const context = await browser.newContext({
-      userAgent:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      viewport: { width: 1920, height: 1080 },
+      locale: 'en-US',
+      timezoneId: 'Europe/Istanbul',
+      extraHTTPHeaders: config.upwork.headers
     });
 
     const page = await context.newPage();
-
+    
+    // Cookie ve localStorage'ı temizle
+    await context.clearCookies();
+    
+    // Sayfaya git
     console.log("Sayfa yükleniyor:", config.upwork.searchUrl);
     await page.goto(config.upwork.searchUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
+      waitUntil: "networkidle",
+      timeout: 60000
     });
 
-    console.log("Sayfa yüklendi, bekleme başlıyor...");
-    await page.waitForTimeout(10000);
+    // Sayfanın tam yüklenmesini bekle
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(15000);
+
+    // Scroll işlemi ekleyelim
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    await page.waitForTimeout(5000);
 
     const pageTitle = await page.title();
     console.log("Sayfa başlığı:", pageTitle);
