@@ -1,3 +1,2 @@
 [build]
-builder = "ubuntu-22.04"
-buildCommand = "apt-get update && apt-get install -y libwebkit2gtk-4.0-0 && npm install"
+dockerfilePath = "Dockerfile"
